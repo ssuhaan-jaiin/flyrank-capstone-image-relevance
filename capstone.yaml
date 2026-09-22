@@ -1,5 +1,20 @@
-run: "TBD — filled in Phase 4"
-seed: "TBD"
-test: "TBD"
+run: |
+  docker run --name imgdb -e POSTGRES_PASSWORD=dev -e POSTGRES_DB=imagerelevance -p 5432:5432 -v imgdata:/var/lib/postgresql -d postgres
+  ollama serve &
+  python3 database.py
+  uvicorn main:app --reload
+seed: |
+  python3 download_images.py
+  python3 vision.py
+  python3 seed_posts.py
+  python3 seed_eval.py
+test: curl http://localhost:8000/eval/run
 base_url: http://localhost:8000
-endpoints: []
+endpoints:
+  - GET /
+  - GET /images/{id}
+  - POST /posts
+  - GET /posts/{id}/images
+  - POST /suggestions/{id}/approve
+  - POST /suggestions/{id}/reject
+  - GET /eval/run
